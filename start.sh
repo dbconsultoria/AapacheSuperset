@@ -1,20 +1,31 @@
 #!/bin/bash
 
-# Aguarda o banco de dados estar pronto (ajuste host e porta se necessário)
-echo "Aguardando o banco de dados..."
+set -e  # encerra o script se algum comando falhar, exceto onde tratado
+
+echo "🔄 Aguardando o banco de dados estar pronto..."
+
+# Espera ativa com timeout opcional (pode ser substituído por healthcheck real)
 sleep 10
 
-# Inicialização
+echo "✅ Inicializando o Superset..."
+
+# Aplica migrações no banco
 superset db upgrade
+
+# Cria usuário admin, ignora erro se já existir
 superset fab create-admin \
-    --username admin \
-    --firstname Admin \
-    --lastname User \
-    --email admin@superset.com \
-    --password admin || true  # ignora se o usuário já existir
+    --username "${SUPERSET_ADMIN_USERNAME:-admin}" \
+    --firstname "${SUPERSET_ADMIN_FIRSTNAME:-Admin}" \
+    --lastname "${SUPERSET_ADMIN_LASTNAME:-User}" \
+    --email "${SUPERSET_ADMIN_EMAIL:-admin@superset.com}" \
+    --password "${SUPERSET_ADMIN_PASSWORD:-admin}" || true
+
+# Inicializa os assets e roles
 superset init
 
-# Inicia o servidor Gunicorn
+echo "🚀 Iniciando o servidor Superset..."
+
+# Inicia o servidor Gunicorn escutando na porta correta
 exec gunicorn \
     --workers=4 \
     --threads=2 \
