@@ -1,5 +1,6 @@
 # Arquivo: superset_config.py
 
+SECRET_KEY = 'QjD96dkmHsqLPyoj48rMsVnK1Usy5Z5kEXyGHZgUkPY='
 ROW_LIMIT = 5000
 SUPERSET_WEBSERVER_TIMEOUT = 60
 
